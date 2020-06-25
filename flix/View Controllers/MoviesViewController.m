@@ -13,17 +13,18 @@
 #import "MBProgressHUD.h"
 
 // Established that the data source and delegate as expected interfaces.
-@interface MoviesViewController () <UITableViewDataSource, UIGestureRecognizerDelegate>
+@interface MoviesViewController () <UITableViewDataSource, UIGestureRecognizerDelegate, UISearchBarDelegate>
 
 // Created an outlet from Table View to View Controller so that we can refer to the Table View.
 @property (weak, nonatomic) IBOutlet UITableView *tableView;
 @property (weak, nonatomic) IBOutlet UIActivityIndicatorView *activityIndicator;
+@property (weak, nonatomic) IBOutlet UISearchBar *searchBar;
+@property (strong, nonatomic) NSArray *filteredData;
 
 
 // Created getter and setter methods, usually going to stick with (nonatomic, strong)
 // Movies is now a class property
 @property (nonatomic, strong) NSArray *movies;
-
 @property (nonatomic, strong) UIRefreshControl *refreshControl;
 
 
@@ -36,6 +37,7 @@
     //[self networkError];
     
     // Set the view controller and data source to this view controller object.
+    self.searchBar.delegate = self;
     self.tableView.dataSource = self;
     self.tableView.delegate = self;
 
@@ -51,12 +53,9 @@
 
 - (void)networkError {
     UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Cannot Get Movies" message:@"The Internet connection appears to be offline." preferredStyle:(UIAlertControllerStyleAlert)];
-    
-    // create a cancel action
     UIAlertAction *tryAction = [UIAlertAction actionWithTitle:@"Try Again" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {}];
     [self fetchMovies];
     [alert addAction:tryAction];
-
     [self presentViewController:alert animated:YES completion:^{
     }];
 }
@@ -75,13 +74,13 @@
                NSLog(@"%@", dataDictionary);
                
                self.movies = dataDictionary[@"results"];
+               self.filteredData = self.movies;
                for (NSDictionary *movie in self.movies) {
                    NSLog(@"%@", movie[@"title"]);
                }
                
                [self.tableView reloadData];
            }
-        // If new movies are fetched, close the refresher.
         [self.refreshControl endRefreshing];
         [MBProgressHUD hideHUDForView:self.view animated:YES];
        }];
@@ -96,7 +95,7 @@
 
 // Creating and configured a cell.
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-    
+
     // Reuses old objects to preserve memory. Use MovieCell Template.
     // To conserve memory, Table Views discard of the memory of a row when it is not in view.
     MovieCell *cell = [tableView dequeueReusableCellWithIdentifier:@"MovieCell"];
@@ -114,6 +113,20 @@
     // Set the poster view to the new image.
     [cell.posterView setImageWithURL:posterURL];
     return cell;
+}
+
+- (void)searchBar:(UISearchBar *)searchBar textDidChange:(NSString *)searchText {
+    if (searchText.length != 0) {
+        NSPredicate *predicate = [NSPredicate predicateWithBlock:^BOOL(NSString *evaluatedObject, NSDictionary *bindings) {
+            return [evaluatedObject containsString:searchText];
+        }];
+        self.filteredData = [self.movies filteredArrayUsingPredicate:predicate];
+        NSLog(@"%@", self.filteredData);
+    }
+    else {
+        self.filteredData = self.movies;
+    }
+    [self.tableView reloadData];
 }
 
 
