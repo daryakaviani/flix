@@ -15,6 +15,8 @@
 
 @property (nonatomic, strong) NSArray *movies;
 @property (weak, nonatomic) IBOutlet UICollectionView *collectionView;
+@property (weak, nonatomic) IBOutlet UISearchBar *searchBar;
+@property (strong, nonatomic) NSArray *filteredData;
 
 @end
 
@@ -22,6 +24,7 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    self.searchBar.delegate = self;
     self.collectionView.dataSource = self;
     self.collectionView.delegate = self;
     [self fetchMovies];
@@ -49,7 +52,7 @@
                NSLog(@"%@", dataDictionary);
                
                self.movies = dataDictionary[@"results"];
-               
+               self.filteredData = self.movies;
                [self.collectionView reloadData];
            }
        }];
@@ -57,6 +60,30 @@
     [task resume];
 }
 
+- (void)searchBar:(UISearchBar *)searchBar textDidChange:(NSString *)searchText {
+    if (searchText.length != 0) {
+        NSPredicate *predicate = [NSPredicate predicateWithBlock:^BOOL(id _Nullable evaluatedObject, NSDictionary<NSString *,id> * _Nullable bindings) {
+            NSDictionary *movieDictionary = evaluatedObject;
+            NSString *movieTitle = movieDictionary[@"title"];
+            return [movieTitle containsString:searchText];
+        }];
+        self.filteredData = [self.movies filteredArrayUsingPredicate:predicate];
+    } else {
+        self.filteredData = self.movies;
+    }
+    [self.collectionView reloadData];
+}
+
+- (void)searchBarTextDidBeginEditing:(UISearchBar *)searchBar {
+    self.searchBar.showsCancelButton = YES;
+}
+
+- (void)searchBarCancelButtonClicked:(UISearchBar *)searchBar {
+    self.searchBar.showsCancelButton = NO;
+    self.searchBar.text = @"";
+    [self.searchBar resignFirstResponder];
+    [self fetchMovies];
+}
 
 #pragma mark - Navigation
 
@@ -79,7 +106,7 @@
 - (nonnull __kindof UICollectionViewCell *)collectionView:(nonnull UICollectionView *)collectionView cellForItemAtIndexPath:(nonnull NSIndexPath *)indexPath {
     MovieCollectionCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"MovieCollectionCell" forIndexPath:indexPath];
     
-    NSDictionary *movie = self.movies[indexPath.item];
+    NSDictionary *movie = self.filteredData[indexPath.item];
     
     NSString *baseURLString = @"https://image.tmdb.org/t/p/w500";
     NSString *posterURLString = movie[@"poster_path"];
@@ -95,7 +122,7 @@
 }
 
 - (NSInteger)collectionView:(nonnull UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section {
-    return self.movies.count;
+    return self.filteredData.count;
 }
 
 @end

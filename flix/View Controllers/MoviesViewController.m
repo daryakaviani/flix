@@ -90,7 +90,7 @@
 
 // Tells us how many rows we need.
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    return self.movies.count;
+    return self.filteredData.count;
 }
 
 // Creating and configured a cell.
@@ -99,7 +99,7 @@
     // Reuses old objects to preserve memory. Use MovieCell Template.
     // To conserve memory, Table Views discard of the memory of a row when it is not in view.
     MovieCell *cell = [tableView dequeueReusableCellWithIdentifier:@"MovieCell"];
-    NSDictionary *movie = self.movies[indexPath.row];
+    NSDictionary *movie = self.filteredData[indexPath.row];
     cell.titleLabel.text = movie[@"title"];
     cell.synopsisLabel.text = movie[@"overview"];
     
@@ -117,18 +117,29 @@
 
 - (void)searchBar:(UISearchBar *)searchBar textDidChange:(NSString *)searchText {
     if (searchText.length != 0) {
-        NSPredicate *predicate = [NSPredicate predicateWithBlock:^BOOL(NSString *evaluatedObject, NSDictionary *bindings) {
-            return [evaluatedObject containsString:searchText];
+        NSPredicate *predicate = [NSPredicate predicateWithBlock:^BOOL(id _Nullable evaluatedObject, NSDictionary<NSString *,id> * _Nullable bindings) {
+            NSDictionary *movieDictionary = evaluatedObject;
+            NSString *movieTitle = movieDictionary[@"title"];
+//            NSLog(@"%@", self.filteredData);
+            return [movieTitle containsString:searchText];
         }];
         self.filteredData = [self.movies filteredArrayUsingPredicate:predicate];
-        NSLog(@"%@", self.filteredData);
-    }
-    else {
+    } else {
         self.filteredData = self.movies;
     }
     [self.tableView reloadData];
 }
 
+- (void)searchBarTextDidBeginEditing:(UISearchBar *)searchBar {
+    self.searchBar.showsCancelButton = YES;
+}
+
+- (void)searchBarCancelButtonClicked:(UISearchBar *)searchBar {
+    self.searchBar.showsCancelButton = NO;
+    self.searchBar.text = @"";
+    [self.searchBar resignFirstResponder];
+    [self fetchMovies];
+}
 
 #pragma mark - Navigation
 
