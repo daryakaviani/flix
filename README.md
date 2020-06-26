@@ -24,7 +24,8 @@ The following **optional** features are implemented:
 - [x] All images fade in as they are loading.
 - [x] For the large poster, load the low resolution image first and then switch to the high resolution image when complete.
 - [x] Customize the selection effect of the cell.
-- [ ] Customize the navigation bar.
+- [x] Customize the navigation bar.
+- [x] While poster is being fetched, user see's a placeholder image.
 - [ ] Customize the UI.
 
 The following **additional** features are implemented:
