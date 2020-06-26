@@ -55,18 +55,11 @@
     [self.tableView addSubview:self.refreshControl];
     
     // Customization for Nav Bar
-    self.navigationItem.title = @"Welcome to Flix";
+    self.navigationItem.title = @"flix";
     UINavigationBar *navigationBar = self.navigationController.navigationBar;
-    //[navigationBar setBackgroundImage:[UIImage imageNamed:@"codepath-logo"] forBarMetrics:UIBarMetricsDefault];
-    navigationBar.tintColor = [UIColor colorWithRed:0 green:2 blue:1 alpha:0.8];
-    
-    NSShadow *shadow = [NSShadow new];
-    shadow.shadowColor = [[UIColor grayColor] colorWithAlphaComponent:0.5];
-    shadow.shadowOffset = CGSizeMake(2, 2);
-    shadow.shadowBlurRadius = 0;
-    navigationBar.titleTextAttributes = @{NSFontAttributeName : [UIFont boldSystemFontOfSize:22],
-      NSForegroundColorAttributeName : [UIColor colorWithRed:0 green:0.7 blue:0.5 alpha:0.8],
-      NSShadowAttributeName : shadow};
+    [navigationBar setBackgroundColor:[UIColor colorWithRed:0.98 green:0.77 blue:0.73 alpha:1]];
+    navigationBar.titleTextAttributes = @{NSFontAttributeName : [UIFont systemFontOfSize:30],
+                                          NSForegroundColorAttributeName : [UIColor colorWithRed:0.98 green:0.77 blue:0.73 alpha:1]};
 }
 
 - (void)networkError {
@@ -100,7 +93,6 @@
                [self.tableView reloadData];
            }
         [self.refreshControl endRefreshing];
-//        [MBProgressHUD hideHUDForView:self.view animated:YES];
        }];
     
     [task resume];
@@ -154,7 +146,7 @@
     }];
     
     UIView *backgroundView = [[UIView alloc] init];
-    backgroundView.backgroundColor = UIColor.systemTealColor;
+    backgroundView.backgroundColor = [UIColor colorWithRed:0.98 green:0.77 blue:0.73 alpha:0.5];
     cell.selectedBackgroundView = backgroundView;
     
     return cell;
@@ -198,7 +190,7 @@
     // Pass the selected object to the new view controller.
     UITableViewCell *tappedCell = sender;
     NSIndexPath *indexPath = [self.tableView indexPathForCell:tappedCell];
-    NSDictionary *movie = self.movies[indexPath.row];
+    NSDictionary *movie = self.filteredData[indexPath.row];
     
     DetailsViewController *detailsViewController = [segue destinationViewController];
     detailsViewController.movie = movie;
