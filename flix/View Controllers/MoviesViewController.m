@@ -34,8 +34,6 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    //[self networkError];
-    
     // Set the view controller and data source to this view controller object.
     self.searchBar.delegate = self;
     self.tableView.dataSource = self;

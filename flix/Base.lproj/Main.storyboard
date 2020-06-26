@@ -233,7 +233,7 @@
                                     <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
                                 </collectionViewFlowLayout>
                                 <cells>
-                                    <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="MovieCollectionCell" translatesAutoresizingMaskIntoConstraints="NO" id="8li-eh-RPo" customClass="MovieCollectionCell">
+                                    <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" fixedFrame="YES" reuseIdentifier="MovieCollectionCell" translatesAutoresizingMaskIntoConstraints="NO" id="8li-eh-RPo" customClass="MovieCollectionCell">
                                         <rect key="frame" x="0.0" y="0.0" width="148" height="200"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO">

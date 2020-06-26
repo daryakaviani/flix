@@ -45,7 +45,7 @@
     NSURLSession *session = [NSURLSession sessionWithConfiguration:[NSURLSessionConfiguration defaultSessionConfiguration] delegate:nil delegateQueue:[NSOperationQueue mainQueue]];
     NSURLSessionDataTask *task = [session dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
            if (error != nil) {
-               NSLog(@"%@", [error localizedDescription]);
+               [self networkError];
            }
            else {
                NSDictionary *dataDictionary = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:nil];
@@ -115,10 +115,42 @@
     
     // Blank out image before downloading the new replacement.
     cell.posterView.image = nil;
-    // Set the poster view to the new image.
-    [cell.posterView setImageWithURL:posterURL];
+    
+    NSURLRequest *request = [NSURLRequest requestWithURL:posterURL];
+    __weak MovieCollectionCell *weakSelf = cell;
+    [cell.posterView setImageWithURLRequest:request placeholderImage:nil
+                 success:^(NSURLRequest *imageRequest, NSHTTPURLResponse *imageResponse, UIImage *image) {
+                                        
+    // imageResponse will be nil if the image is cached
+    if (imageResponse) {
+        NSLog(@"Image was NOT cached, fade in image");
+        weakSelf.posterView.alpha = 0.0;
+        weakSelf.posterView.image = image;
+        
+        //Animate UIImageView back to alpha 1 over 0.3sec
+        [UIView animateWithDuration:0.3 animations:^{
+            weakSelf.posterView.alpha = 1.0;
+        }];
+    }
+    else {
+        NSLog(@"Image was cached so just update the image");
+        weakSelf.posterView.image = image;
+    }
+    }
+    failure:^(NSURLRequest *request, NSHTTPURLResponse * response, NSError *error) {
+        [self networkError];
+    }];
     
     return cell;
+}
+
+- (void)networkError {
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Cannot Get Movies" message:@"The Internet connection appears to be offline." preferredStyle:(UIAlertControllerStyleAlert)];
+    UIAlertAction *tryAction = [UIAlertAction actionWithTitle:@"Try Again" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {}];
+    [self fetchMovies];
+    [alert addAction:tryAction];
+    [self presentViewController:alert animated:YES completion:^{
+    }];
 }
 
 - (NSInteger)collectionView:(nonnull UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section {
