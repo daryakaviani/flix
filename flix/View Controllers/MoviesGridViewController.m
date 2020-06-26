@@ -98,8 +98,6 @@
     
     DetailsViewController *detailsViewController = [segue destinationViewController];
     detailsViewController.movie = movie;
-    
-    NSLog(@"Tapping on a movie!");
 }
 
 

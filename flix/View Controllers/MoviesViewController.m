@@ -53,6 +53,20 @@
     [self.refreshControl addTarget:self action:@selector(fetchMovies) forControlEvents:UIControlEventValueChanged];
     [self.tableView insertSubview:self.refreshControl atIndex:0];
     [self.tableView addSubview:self.refreshControl];
+    
+    // Customization for Nav Bar
+    self.navigationItem.title = @"Welcome to Flix";
+    UINavigationBar *navigationBar = self.navigationController.navigationBar;
+    //[navigationBar setBackgroundImage:[UIImage imageNamed:@"codepath-logo"] forBarMetrics:UIBarMetricsDefault];
+    navigationBar.tintColor = [UIColor colorWithRed:0 green:2 blue:1 alpha:0.8];
+    
+    NSShadow *shadow = [NSShadow new];
+    shadow.shadowColor = [[UIColor grayColor] colorWithAlphaComponent:0.5];
+    shadow.shadowOffset = CGSizeMake(2, 2);
+    shadow.shadowBlurRadius = 0;
+    navigationBar.titleTextAttributes = @{NSFontAttributeName : [UIFont boldSystemFontOfSize:22],
+      NSForegroundColorAttributeName : [UIColor colorWithRed:0 green:0.7 blue:0.5 alpha:0.8],
+      NSShadowAttributeName : shadow};
 }
 
 - (void)networkError {
@@ -115,21 +129,20 @@
     // Blank out image before downloading the new replacement.
     cell.posterView.image = nil;
     
+    UIImage *img = [UIImage imageNamed:@"loading.jpg"];
+    [cell.posterView setImage:img];
     NSURLRequest *request = [NSURLRequest requestWithURL:posterURL];
     __weak MovieCell *weakSelf = cell;
     [cell.posterView setImageWithURLRequest:request placeholderImage:nil
                  success:^(NSURLRequest *imageRequest, NSHTTPURLResponse *imageResponse, UIImage *image) {
                                         
-    // imageResponse will be nil if the image is cached
     if (imageResponse) {
-        NSLog(@"Image was NOT cached, fade in image");
-        weakSelf.posterView.alpha = 0.0;
-        weakSelf.posterView.image = image;
-        
-        //Animate UIImageView back to alpha 1 over 0.3sec
-        [UIView animateWithDuration:0.3 animations:^{
-            weakSelf.posterView.alpha = 1.0;
-        }];
+        [UIView transitionWithView:cell.posterView
+                          duration:0.3f
+                           options:UIViewAnimationOptionTransitionCrossDissolve
+                        animations:^{
+                          cell.posterView.image = image;
+        } completion:nil];
     }
     else {
         NSLog(@"Image was cached so just update the image");
@@ -156,7 +169,6 @@
         NSPredicate *predicate = [NSPredicate predicateWithBlock:^BOOL(id _Nullable evaluatedObject, NSDictionary<NSString *,id> * _Nullable bindings) {
             NSDictionary *movieDictionary = evaluatedObject;
             NSString *movieTitle = movieDictionary[@"title"];
-//            NSLog(@"%@", self.filteredData);
             return [movieTitle containsString:searchText];
         }];
         self.filteredData = [self.movies filteredArrayUsingPredicate:predicate];
@@ -190,8 +202,6 @@
     
     DetailsViewController *detailsViewController = [segue destinationViewController];
     detailsViewController.movie = movie;
-    
-    NSLog(@"Tapping on a movie!");
 }
 
 
