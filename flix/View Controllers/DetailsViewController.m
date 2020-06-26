@@ -8,12 +8,14 @@
 
 #import "DetailsViewController.h"
 #import "UIImageView+AFNetworking.h"
+#import "TrailerViewController.h"
 
 @interface DetailsViewController ()
 @property (weak, nonatomic) IBOutlet UIImageView *backdropView;
 @property (weak, nonatomic) IBOutlet UIImageView *posterView;
 @property (weak, nonatomic) IBOutlet UILabel *titleLabel;
 @property (weak, nonatomic) IBOutlet UILabel *synopsisLabel;
+- (IBAction)tapped:(UITapGestureRecognizer *)sender;
 
 @end
 
@@ -22,6 +24,16 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
+    
+    // Here we use the method didPan(sender:), which we defined in the previous step, as the action.
+    UITapGestureRecognizer *tapGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(didTap:)];
+    
+    // Optionally set the number of required taps, e.g., 2 for a double click
+    tapGestureRecognizer.numberOfTapsRequired = 2;
+    
+    // Attach it to a view of your choice. If it's a UIImageView, remember to enable user interaction
+    [self.view setUserInteractionEnabled:YES];
+    [self.view addGestureRecognizer:tapGestureRecognizer];
     
     NSString *baseURLString = @"https://image.tmdb.org/t/p/w500";
     NSString *posterURLString = self.movie[@"poster_path"];
@@ -40,17 +52,26 @@
     [self.titleLabel sizeToFit];
     [self.synopsisLabel sizeToFit];
 }
-/*
+
  
  #pragma mark - Navigation
 
 // In a storyboard-based application, you will often want to do a little preparation before navigation
- 
-- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
-     
-    // Get the new view controller using [segue destinationViewController].
-    // Pass the selected object to the new view controller.
-}
-*/
 
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+    NSString *fullAPIURLString = [NSString stringWithFormat:@"https://api.themoviedb.org/3/movie/%@/videos?api_key=a07e22bc18f5cb106bfe4cc1f83ad8ed", self.movie[@"id"]];
+    TrailerViewController *trailerViewController = segue.destinationViewController;
+    trailerViewController.urlString = fullAPIURLString;
+}
+
+/* TRAILER FEATURE */
+
+- (IBAction)tapped:(UITapGestureRecognizer *)sender {
+    
+}
+
+- (IBAction)didTap:(UITapGestureRecognizer *)sender {
+//    CGPoint location = [sender locationInView:self.view];
+    [self performSegueWithIdentifier:@"segue" sender:nil];
+}
 @end

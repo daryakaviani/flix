@@ -41,8 +41,14 @@
     self.tableView.dataSource = self;
     self.tableView.delegate = self;
 
-    [MBProgressHUD showHUDAddedTo:self.view animated:YES];
-    [self fetchMovies];
+    MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
+    dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, 0.01 * NSEC_PER_SEC);
+    hud.animationType = MBProgressHUDModeAnnularDeterminate;
+    hud.label.text = @"Fetching Your Films";
+    dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
+        [self fetchMovies];
+        [MBProgressHUD hideHUDForView:self.view animated:YES];
+    });
     
     // Initialize the refresher.
     self.refreshControl = [[UIRefreshControl alloc] init];
@@ -82,7 +88,7 @@
                [self.tableView reloadData];
            }
         [self.refreshControl endRefreshing];
-        [MBProgressHUD hideHUDForView:self.view animated:YES];
+//        [MBProgressHUD hideHUDForView:self.view animated:YES];
        }];
     
     [task resume];
@@ -110,8 +116,32 @@
     
     // Blank out image before downloading the new replacement.
     cell.posterView.image = nil;
-    // Set the poster view to the new image.
-    [cell.posterView setImageWithURL:posterURL];
+    
+    NSURLRequest *request = [NSURLRequest requestWithURL:posterURL];
+    __weak MovieCell *weakSelf = cell;
+    [cell.posterView setImageWithURLRequest:request placeholderImage:nil
+                 success:^(NSURLRequest *imageRequest, NSHTTPURLResponse *imageResponse, UIImage *image) {
+                                        
+    // imageResponse will be nil if the image is cached
+    if (imageResponse) {
+        NSLog(@"Image was NOT cached, fade in image");
+        weakSelf.posterView.alpha = 0.0;
+        weakSelf.posterView.image = image;
+        
+        //Animate UIImageView back to alpha 1 over 0.3sec
+        [UIView animateWithDuration:0.3 animations:^{
+            weakSelf.posterView.alpha = 1.0;
+        }];
+    }
+    else {
+        NSLog(@"Image was cached so just update the image");
+        weakSelf.posterView.image = image;
+    }
+    }
+    failure:^(NSURLRequest *request, NSHTTPURLResponse * response, NSError *error) {
+        [self networkError];
+    }];
+    
     return cell;
 }
 
