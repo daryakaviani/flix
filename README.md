@@ -48,7 +48,7 @@ GIF created with RecordIt.
 
 ## Notes
 
-Describe any challenges encountered while building the app.
+I had issues with some of XCodes bugs. Particularly, the Assistant View often failed to show up for the correct view and I had to Clean and Restart the app several times before the issue was solved each time this occurred. This was particularly challenging when I wanted to create outlets.
 
 ## Credits
 
