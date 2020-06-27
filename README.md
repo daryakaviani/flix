@@ -2,7 +2,7 @@
 
 **Flix** is a movies app using the [The Movie Database API](http://docs.themoviedb.apiary.io/#).
 
-Time spent: **X** hours spent in total
+Time spent: **25** hours spent in total
 
 ## User Stories
 
@@ -26,24 +26,25 @@ The following **optional** features are implemented:
 - [x] Customize the selection effect of the cell.
 - [x] Customize the navigation bar.
 - [x] While poster is being fetched, user see's a placeholder image.
-- [ ] Customize the UI.
+- [x] Customize the UI.
 
 The following **additional** features are implemented:
 
-- [ ] List anything else that you can get done to improve the app functionality!
+- [x] Displays the popularity rating of each movie by fetching the float from the Now Playing endpoint, converting it to a string, and selecting the first two characters.
+- [x] Displays the release date of each movie.
 
 Please list two areas of the assignment you'd like to **discuss further with your peers** during the next class (examples include better ways to implement something, how to extend your app in certain ways, etc):
 
-1.
-2.
+1. I noticed there was a lot of overlapping code in my project. Tutorials also often copy and pasted aspects of previously implemented features as opposed to creating a publicly accessible method and calling them from various locations in the project. I am wondering if this is the norm in iOS development or if adding widely used methods to the *.h* files instead of the *.m* files could help us avoid repetitive code.
+2. Before I decided on popularity and release date, I was planning on adding reviews using the Reviews endpoint of the Movies Database API to obtain a number from 1-5 and subsequently display that particular number of star icons. Unfortunately, the API did not include the reviews for newly released Now Playing movies, but it would be interesting to look into other APIs to implement this functionality in the future.
 
 ## Video Walkthrough
 
 Here's a walkthrough of implemented user stories:
 
-<img src='http://i.imgur.com/link/to/your/gif/file.gif' title='Video Walkthrough' width='' alt='Video Walkthrough' />
+<img src='http://g.recordit.co/8bZjsnrvNK.gif' title='Video Walkthrough' width='' alt='Video Walkthrough' />
 
-GIF created with [LiceCap](http://www.cockos.com/licecap/).
+GIF created with RecordIt.
 
 ## Notes
 
@@ -54,6 +55,8 @@ Describe any challenges encountered while building the app.
 List an 3rd party libraries, icons, graphics, or other assets you used in your app.
 
 - [AFNetworking](https://github.com/AFNetworking/AFNetworking) - networking task library
+- [Flaticon] (https://flaticon.com) - icons
+- [MBProgressHUD] (https://github.com/matej/MBProgressHUD) - loading icon animation
 
 ## License
 
