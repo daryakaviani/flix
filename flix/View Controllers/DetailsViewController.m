@@ -15,6 +15,8 @@
 @property (weak, nonatomic) IBOutlet UIImageView *posterView;
 @property (weak, nonatomic) IBOutlet UILabel *titleLabel;
 @property (weak, nonatomic) IBOutlet UILabel *synopsisLabel;
+@property (weak, nonatomic) IBOutlet UILabel *dateLabel;
+@property (weak, nonatomic) IBOutlet UILabel *popLabel;
 
 @end
 
@@ -87,9 +89,13 @@
     
     self.titleLabel.text = self.movie[@"title"];
     self.synopsisLabel.text = self.movie[@"overview"];
-    
+    self.dateLabel.text = self.movie[@"release_date"];
+    NSString *tempPop = [NSString stringWithFormat:@"%@", self.movie[@"popularity"]];
+    self.popLabel.text = [tempPop substringWithRange:NSMakeRange(0, 2)];
     [self.titleLabel sizeToFit];
     [self.synopsisLabel sizeToFit];
+    [self.dateLabel sizeToFit];
+    [self.popLabel sizeToFit];
 }
  
  #pragma mark - Navigation

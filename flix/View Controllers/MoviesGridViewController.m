@@ -139,6 +139,13 @@
         [self networkError];
     }];
     
+    // Customization for Nav Bar
+    UINavigationBar *navigationBar = self.navigationController.navigationBar;
+    [navigationBar setBackgroundColor:[UIColor colorWithRed:0.98 green:0.77 blue:0.73 alpha:1]];
+    navigationBar.titleTextAttributes = @{NSFontAttributeName : [UIFont systemFontOfSize:30],
+                                          NSForegroundColorAttributeName : [UIColor colorWithRed:0.98 green:0.77 blue:0.73 alpha:1]};
+
+    
     return cell;
 }
 

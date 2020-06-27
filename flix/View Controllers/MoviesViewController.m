@@ -55,7 +55,7 @@
     [self.tableView addSubview:self.refreshControl];
     
     // Customization for Nav Bar
-    self.navigationItem.title = @"flix";
+    self.navigationItem.title = @"now playing";
     UINavigationBar *navigationBar = self.navigationController.navigationBar;
     [navigationBar setBackgroundColor:[UIColor colorWithRed:0.98 green:0.77 blue:0.73 alpha:1]];
     navigationBar.titleTextAttributes = @{NSFontAttributeName : [UIFont systemFontOfSize:30],
@@ -64,8 +64,9 @@
 
 - (void)networkError {
     UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Cannot Get Movies" message:@"The Internet connection appears to be offline." preferredStyle:(UIAlertControllerStyleAlert)];
-    UIAlertAction *tryAction = [UIAlertAction actionWithTitle:@"Try Again" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {}];
-    [self fetchMovies];
+    UIAlertAction *tryAction = [UIAlertAction actionWithTitle:@"Try Again" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+        [self fetchMovies];
+    }];
     [alert addAction:tryAction];
     [self presentViewController:alert animated:YES completion:^{
     }];
