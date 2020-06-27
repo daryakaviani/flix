@@ -48,15 +48,15 @@ GIF created with RecordIt.
 
 ## Notes
 
-I had issues with some of XCodes bugs. Particularly, the Assistant View often failed to show up for the correct view and I had to Clean and Restart the app several times before the issue was solved each time this occurred. This was particularly challenging when I wanted to create outlets.
+I had issues with some of XCode's bugs. Particularly, the Assistant View often failed to show up for the correct view and I had to Clean and Restart the app several times before the issue was solved each time this occurred. This was particularly challenging when I wanted to create outlets.
 
 ## Credits
 
 List an 3rd party libraries, icons, graphics, or other assets you used in your app.
 
 - [AFNetworking](https://github.com/AFNetworking/AFNetworking) - networking task library
-- [Flaticon] (https://flaticon.com) - icons
-- [MBProgressHUD] (https://github.com/matej/MBProgressHUD) - loading icon animation
+- [Flaticon](https://flaticon.com) - icons
+- [MBProgressHUD](https://github.com/matej/MBProgressHUD) - loading icon animation
 
 ## License
 
