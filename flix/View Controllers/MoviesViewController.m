@@ -122,7 +122,7 @@
     // Blank out image before downloading the new replacement.
     cell.posterView.image = nil;
     
-    UIImage *img = [UIImage imageNamed:@"loading.jpg"];
+    UIImage *img = [UIImage imageNamed:@"loading.png"];
     [cell.posterView setImage:img];
     NSURLRequest *request = [NSURLRequest requestWithURL:posterURL];
     __weak MovieCell *weakSelf = cell;
