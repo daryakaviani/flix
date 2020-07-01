@@ -11,15 +11,17 @@
 #import "UIImageView+AFNetworking.h"
 #import "DetailsViewController.h"
 #import "MBProgressHUD.h"
+#import "Movie.h"
+#import "MovieApiManager.h"
 
 // Established that the data source and delegate as expected interfaces.
-@interface MoviesViewController () <UITableViewDataSource, UIGestureRecognizerDelegate, UISearchBarDelegate>
+@interface MoviesViewController () <UITableViewDataSource, UIGestureRecognizerDelegate, UISearchBarDelegate, UITableViewDelegate>
 
 // Created an outlet from Table View to View Controller so that we can refer to the Table View.
 @property (weak, nonatomic) IBOutlet UITableView *tableView;
 @property (weak, nonatomic) IBOutlet UIActivityIndicatorView *activityIndicator;
 @property (weak, nonatomic) IBOutlet UISearchBar *searchBar;
-@property (strong, nonatomic) NSArray *filteredData;
+@property (nonatomic, strong) NSArray *filteredData;
 
 
 // Created getter and setter methods, usually going to stick with (nonatomic, strong)
@@ -44,7 +46,13 @@
     hud.animationType = MBProgressHUDModeAnnularDeterminate;
     hud.label.text = @"Fetching Your Films";
     dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
-        [self fetchMovies];
+        // new is an alternative syntax to calling alloc init.
+        MovieApiManager *manager = [MovieApiManager new];
+        [manager fetchNowPlaying:^(NSArray *movies, NSError *error) {
+            self.movies = movies;
+            self.filteredData = self.movies;
+            [self.tableView reloadData];
+        }];
         [MBProgressHUD hideHUDForView:self.view animated:YES];
     });
     
@@ -87,10 +95,8 @@
                
                self.movies = dataDictionary[@"results"];
                self.filteredData = self.movies;
-               for (NSDictionary *movie in self.movies) {
-                   NSLog(@"%@", movie[@"title"]);
-               }
-               
+               NSArray *dictionaries = dataDictionary[@"results"];
+               dictionaries = [Movie moviesWithDictionaries:dictionaries];
                [self.tableView reloadData];
            }
         [self.refreshControl endRefreshing];
@@ -105,51 +111,13 @@
 }
 
 // Creating and configured a cell.
+
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
 
-    // Reuses old objects to preserve memory. Use MovieCell Template.
-    // To conserve memory, Table Views discard of the memory of a row when it is not in view.
     MovieCell *cell = [tableView dequeueReusableCellWithIdentifier:@"MovieCell"];
-    NSDictionary *movie = self.filteredData[indexPath.row];
-    cell.titleLabel.text = movie[@"title"];
-    cell.synopsisLabel.text = movie[@"overview"];
-    
-    NSString *baseURLString = @"https://image.tmdb.org/t/p/w500";
-    NSString *posterURLString = movie[@"poster_path"];
-    NSString *fullPosterURLString = [baseURLString stringByAppendingString:posterURLString];
-    NSURL *posterURL = [NSURL URLWithString:fullPosterURLString];
-    
-    // Blank out image before downloading the new replacement.
-    cell.posterView.image = nil;
-    
-    UIImage *img = [UIImage imageNamed:@"loading.png"];
-    [cell.posterView setImage:img];
-    NSURLRequest *request = [NSURLRequest requestWithURL:posterURL];
-    __weak MovieCell *weakSelf = cell;
-    [cell.posterView setImageWithURLRequest:request placeholderImage:nil
-                 success:^(NSURLRequest *imageRequest, NSHTTPURLResponse *imageResponse, UIImage *image) {
-                                        
-    if (imageResponse) {
-        [UIView transitionWithView:cell.posterView
-                          duration:0.3f
-                           options:UIViewAnimationOptionTransitionCrossDissolve
-                        animations:^{
-                          cell.posterView.image = image;
-        } completion:nil];
-    }
-    else {
-        NSLog(@"Image was cached so just update the image");
-        weakSelf.posterView.image = image;
-    }
-    }
-    failure:^(NSURLRequest *request, NSHTTPURLResponse * response, NSError *error) {
-        [self networkError];
-    }];
-    
-    UIView *backgroundView = [[UIView alloc] init];
-    backgroundView.backgroundColor = [UIColor colorWithRed:0.98 green:0.77 blue:0.73 alpha:0.5];
-    cell.selectedBackgroundView = backgroundView;
-    
+
+    cell.movie = self.filteredData[indexPath.row];
+
     return cell;
 }
 
@@ -191,7 +159,7 @@
     // Pass the selected object to the new view controller.
     UITableViewCell *tappedCell = sender;
     NSIndexPath *indexPath = [self.tableView indexPathForCell:tappedCell];
-    NSDictionary *movie = self.filteredData[indexPath.row];
+    Movie *movie = self.filteredData[indexPath.row];
     
     DetailsViewController *detailsViewController = [segue destinationViewController];
     detailsViewController.movie = movie;

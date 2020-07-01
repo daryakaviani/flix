@@ -35,22 +35,11 @@
     [self.posterView setUserInteractionEnabled:YES];
     [self.posterView addGestureRecognizer:tapGestureRecognizer];
     
-    NSString *highBaseURLString = @"https://image.tmdb.org/t/p/w500";
-    NSString *lowBaseURLString = @"https://image.tmdb.org/t/p/w200";
     
-    NSString *posterURLString = self.movie[@"poster_path"];
-    NSString *fullPosterURLString = [highBaseURLString stringByAppendingString:posterURLString];
-    NSURL *posterURL = [NSURL URLWithString:fullPosterURLString];
-    [self.posterView setImageWithURL:posterURL];
-    
-    NSString *backdropURLString = self.movie[@"backdrop_path"];
-    NSString *highBackdropURLString = [highBaseURLString stringByAppendingString:backdropURLString];
-    NSURL *urlLarge = [NSURL URLWithString:highBackdropURLString];
-    NSString *lowBackdropURLString = [lowBaseURLString stringByAppendingString:backdropURLString];
-    NSURL *urlSmall = [NSURL URLWithString:lowBackdropURLString];
+    [self.posterView setImageWithURL:self.movie.posterUrl];
 
-    NSURLRequest *requestSmall = [NSURLRequest requestWithURL:urlSmall];
-    NSURLRequest *requestLarge = [NSURLRequest requestWithURL:urlLarge];
+    NSURLRequest *requestSmall = [NSURLRequest requestWithURL:self.movie.smallBackdropUrl];
+    NSURLRequest *requestLarge = [NSURLRequest requestWithURL:self.movie.largeBackdropUrl];
 
     __weak DetailsViewController *weakSelf = self;
 
@@ -87,11 +76,10 @@
                    // possibly try to get the large image
                }];
     
-    self.titleLabel.text = self.movie[@"title"];
-    self.synopsisLabel.text = self.movie[@"overview"];
-    self.dateLabel.text = self.movie[@"release_date"];
-    NSString *tempPop = [NSString stringWithFormat:@"%@", self.movie[@"popularity"]];
-    self.popLabel.text = [tempPop substringWithRange:NSMakeRange(0, 2)];
+    self.titleLabel.text = self.movie.title;
+    self.synopsisLabel.text = self.movie.overview;
+    self.dateLabel.text = self.movie.releaseDate;
+    self.popLabel.text = [self.movie.popularity substringWithRange:NSMakeRange(0, 2)];
     [self.titleLabel sizeToFit];
     [self.synopsisLabel sizeToFit];
     [self.dateLabel sizeToFit];
@@ -103,7 +91,7 @@
 // In a storyboard-based application, you will often want to do a little preparation before navigation
 
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
-    NSString *fullAPIURLString = [NSString stringWithFormat:@"https://api.themoviedb.org/3/movie/%@/videos?api_key=a07e22bc18f5cb106bfe4cc1f83ad8ed", self.movie[@"id"]];
+    NSString *fullAPIURLString = [NSString stringWithFormat:@"https://api.themoviedb.org/3/movie/%@/videos?api_key=a07e22bc18f5cb106bfe4cc1f83ad8ed", self.movie.idNum];
     TrailerViewController *trailerViewController = segue.destinationViewController;
     trailerViewController.urlString = fullAPIURLString;
 }
