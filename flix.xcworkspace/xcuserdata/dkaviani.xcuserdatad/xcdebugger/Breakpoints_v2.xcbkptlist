@@ -30,8 +30,8 @@
             filePath = "flix/Views/MovieCollectionCell.h"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "14"
-            endingLineNumber = "14"
+            startingLineNumber = "15"
+            endingLineNumber = "15"
             landmarkName = "posterView"
             landmarkType = "24">
          </BreakpointContent>

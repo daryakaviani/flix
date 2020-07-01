@@ -10,6 +10,7 @@
 #import "MovieCollectionCell.h"
 #import "UIImageView+AFNetworking.h"
 #import "DetailsViewController.h"
+#import "MovieApiManager.h"
 
 @interface MoviesGridViewController () <UICollectionViewDataSource, UICollectionViewDelegate>
 
@@ -40,31 +41,19 @@
 }
 
 - (void)fetchMovies {
-    NSURL *url = [NSURL URLWithString:@"https://api.themoviedb.org/3/movie/now_playing?api_key=a07e22bc18f5cb106bfe4cc1f83ad8ed"];
-    NSURLRequest *request = [NSURLRequest requestWithURL:url cachePolicy:NSURLRequestReloadIgnoringLocalCacheData timeoutInterval:10.0];
-    NSURLSession *session = [NSURLSession sessionWithConfiguration:[NSURLSessionConfiguration defaultSessionConfiguration] delegate:nil delegateQueue:[NSOperationQueue mainQueue]];
-    NSURLSessionDataTask *task = [session dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
-           if (error != nil) {
-               [self networkError];
-           }
-           else {
-               NSDictionary *dataDictionary = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:nil];
-               NSLog(@"%@", dataDictionary);
-               
-               self.movies = dataDictionary[@"results"];
-               self.filteredData = self.movies;
-               [self.collectionView reloadData];
-           }
-       }];
-    
-    [task resume];
+    MovieApiManager *manager = [MovieApiManager new];
+    [manager fetchNowPlaying:^(NSArray *movies, NSError *error) {
+        self.movies = movies;
+        self.filteredData = self.movies;
+        [self.collectionView reloadData];
+    }];
 }
 
 - (void)searchBar:(UISearchBar *)searchBar textDidChange:(NSString *)searchText {
     if (searchText.length != 0) {
         NSPredicate *predicate = [NSPredicate predicateWithBlock:^BOOL(id _Nullable evaluatedObject, NSDictionary<NSString *,id> * _Nullable bindings) {
-            NSDictionary *movieDictionary = evaluatedObject;
-            NSString *movieTitle = movieDictionary[@"title"];
+            Movie *movie = evaluatedObject;
+            NSString *movieTitle = movie.title;
             return [movieTitle containsString:searchText];
         }];
         self.filteredData = [self.movies filteredArrayUsingPredicate:predicate];
@@ -94,7 +83,7 @@
     
     UITableViewCell *tappedCell = sender;
     NSIndexPath *indexPath = [self.collectionView indexPathForCell:tappedCell];
-    NSDictionary *movie = self.movies[indexPath.row];
+    Movie *movie = self.movies[indexPath.row];
     
     DetailsViewController *detailsViewController = [segue destinationViewController];
     detailsViewController.movie = movie;
@@ -103,49 +92,7 @@
 
 - (nonnull __kindof UICollectionViewCell *)collectionView:(nonnull UICollectionView *)collectionView cellForItemAtIndexPath:(nonnull NSIndexPath *)indexPath {
     MovieCollectionCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"MovieCollectionCell" forIndexPath:indexPath];
-    
-    NSDictionary *movie = self.filteredData[indexPath.item];
-    
-    NSString *baseURLString = @"https://image.tmdb.org/t/p/w500";
-    NSString *posterURLString = movie[@"poster_path"];
-    NSString *fullPosterURLString = [baseURLString stringByAppendingString:posterURLString];
-    NSURL *posterURL = [NSURL URLWithString:fullPosterURLString];
-    
-    // Blank out image before downloading the new replacement.
-    cell.posterView.image = nil;
-    
-    NSURLRequest *request = [NSURLRequest requestWithURL:posterURL];
-    __weak MovieCollectionCell *weakSelf = cell;
-    [cell.posterView setImageWithURLRequest:request placeholderImage:nil
-                 success:^(NSURLRequest *imageRequest, NSHTTPURLResponse *imageResponse, UIImage *image) {
-                                        
-    // imageResponse will be nil if the image is cached
-    if (imageResponse) {
-        NSLog(@"Image was NOT cached, fade in image");
-        weakSelf.posterView.alpha = 0.0;
-        weakSelf.posterView.image = image;
-        
-        //Animate UIImageView back to alpha 1 over 0.3sec
-        [UIView animateWithDuration:0.3 animations:^{
-            weakSelf.posterView.alpha = 1.0;
-        }];
-    }
-    else {
-        NSLog(@"Image was cached so just update the image");
-        weakSelf.posterView.image = image;
-    }
-    }
-    failure:^(NSURLRequest *request, NSHTTPURLResponse * response, NSError *error) {
-        [self networkError];
-    }];
-    
-    // Customization for Nav Bar
-    UINavigationBar *navigationBar = self.navigationController.navigationBar;
-    [navigationBar setBackgroundColor:[UIColor colorWithRed:0.98 green:0.77 blue:0.73 alpha:1]];
-    navigationBar.titleTextAttributes = @{NSFontAttributeName : [UIFont systemFontOfSize:30],
-                                          NSForegroundColorAttributeName : [UIColor colorWithRed:0.98 green:0.77 blue:0.73 alpha:1]};
-
-    
+    cell.movie = self.filteredData[indexPath.row];
     return cell;
 }
 

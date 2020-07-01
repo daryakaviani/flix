@@ -47,12 +47,7 @@
     hud.label.text = @"Fetching Your Films";
     dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
         // new is an alternative syntax to calling alloc init.
-        MovieApiManager *manager = [MovieApiManager new];
-        [manager fetchNowPlaying:^(NSArray *movies, NSError *error) {
-            self.movies = movies;
-            self.filteredData = self.movies;
-            [self.tableView reloadData];
-        }];
+        [self fetchMovies];
         [MBProgressHUD hideHUDForView:self.view animated:YES];
     });
     
@@ -81,28 +76,12 @@
 }
 
 - (void)fetchMovies {
-    NSURL *url = [NSURL URLWithString:@"https://api.themoviedb.org/3/movie/now_playing?api_key=a07e22bc18f5cb106bfe4cc1f83ad8ed"];
-    NSURLRequest *request = [NSURLRequest requestWithURL:url cachePolicy:NSURLRequestReloadIgnoringLocalCacheData timeoutInterval:10.0];
-    NSURLSession *session = [NSURLSession sessionWithConfiguration:[NSURLSessionConfiguration defaultSessionConfiguration] delegate:nil delegateQueue:[NSOperationQueue mainQueue]];
-    NSURLSessionDataTask *task = [session dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
-           if (error != nil) {
-               NSLog(@"%@", [error localizedDescription]);
-               [self networkError];
-           }
-           else {
-               NSDictionary *dataDictionary = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:nil];
-               NSLog(@"%@", dataDictionary);
-               
-               self.movies = dataDictionary[@"results"];
-               self.filteredData = self.movies;
-               NSArray *dictionaries = dataDictionary[@"results"];
-               dictionaries = [Movie moviesWithDictionaries:dictionaries];
-               [self.tableView reloadData];
-           }
-        [self.refreshControl endRefreshing];
-       }];
-    
-    [task resume];
+    MovieApiManager *manager = [MovieApiManager new];
+    [manager fetchNowPlaying:^(NSArray *movies, NSError *error) {
+        self.movies = movies;
+        self.filteredData = self.movies;
+        [self.tableView reloadData];
+    }];
 }
 
 // Tells us how many rows we need.
@@ -113,11 +92,8 @@
 // Creating and configured a cell.
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-
     MovieCell *cell = [tableView dequeueReusableCellWithIdentifier:@"MovieCell"];
-
     cell.movie = self.filteredData[indexPath.row];
-
     return cell;
 }
 
@@ -128,8 +104,8 @@
 - (void)searchBar:(UISearchBar *)searchBar textDidChange:(NSString *)searchText {
     if (searchText.length != 0) {
         NSPredicate *predicate = [NSPredicate predicateWithBlock:^BOOL(id _Nullable evaluatedObject, NSDictionary<NSString *,id> * _Nullable bindings) {
-            NSDictionary *movieDictionary = evaluatedObject;
-            NSString *movieTitle = movieDictionary[@"title"];
+            Movie *movie = evaluatedObject;
+            NSString *movieTitle = movie.title;
             return [movieTitle containsString:searchText];
         }];
         self.filteredData = [self.movies filteredArrayUsingPredicate:predicate];
